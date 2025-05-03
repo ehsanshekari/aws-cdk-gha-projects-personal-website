@@ -1,4 +1,6 @@
 packages:
-  - "apps/*"
-  - "infra"
+  - client
+  - infra
   - "!**/node_modules"
+ignoredBuiltDependencies:
+  - esbuild
