@@ -53,7 +53,8 @@ jobs:
         run: npm install -g aws-cdk
 
       - name: Bootstrap CDK (if needed)
-        run: cdk bootstrap --force --cloudformation-execution-policies "arn:aws:iam::aws:policy/AdministratorAccess" aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.AWS_REGION }}
+        run: cdk bootstrap
+        # --force --cloudformation-execution-policies "arn:aws:iam::aws:policy/AdministratorAccess" aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.AWS_REGION }}
         env:
           CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
           CDK_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
