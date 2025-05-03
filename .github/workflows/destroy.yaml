@@ -34,8 +34,9 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_IAM_ROLE }} # Your IAM role ARN
+          role-to-assume: ${{ secrets.IAM_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: GitHubActions-CDK-${{ github.run_number }}
 
       - name: Destroy CDK stack
         run: cdk destroy --force
