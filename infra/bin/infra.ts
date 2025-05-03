@@ -24,5 +24,5 @@ new InfraStack(app, "InfraStack", {
   },
   domainName,
   bucketName,
-  certificateArn: certStack.certificate.certificateArn, // 🔁 pass certificate
+  certificateArn: certStack.certificateArn,
 });
