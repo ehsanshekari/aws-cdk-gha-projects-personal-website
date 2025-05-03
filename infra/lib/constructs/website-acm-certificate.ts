@@ -1,9 +1,10 @@
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
+import * as route53 from "aws-cdk-lib/aws-route53";
 import { Construct } from "constructs";
 
 export interface WebsiteACMCertificateProps {
   readonly domainName: string;
-  readonly hostedZone: any; // Use proper type from route53.HostedZone
+  readonly hostedZone: route53.IHostedZone;
 }
 
 export class WebsiteACMCertificate extends Construct {

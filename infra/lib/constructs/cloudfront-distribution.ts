@@ -1,10 +1,13 @@
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
+import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import { Construct } from "constructs";
+import * as cdk from "aws-cdk-lib";
 
 export interface WebsiteCloudFrontDistributionProps {
   readonly domainNames: string[];
-  readonly certificate: any; // Use proper type from acm.Certificate
-  readonly origin: any; // Use proper type from origins.S3Origin
+  readonly certificate: acm.ICertificate;
+  readonly origin: origins.S3StaticWebsiteOrigin; // Changed from IOrigin to Origin
 }
 
 export class WebsiteCloudFrontDistribution extends Construct {
@@ -28,6 +31,7 @@ export class WebsiteCloudFrontDistribution extends Construct {
           allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
           cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD_OPTIONS,
           cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+          compress: true,
         },
         domainNames: props.domainNames,
         certificate: props.certificate,
@@ -35,6 +39,20 @@ export class WebsiteCloudFrontDistribution extends Construct {
         priceClass: cloudfront.PriceClass.PRICE_CLASS_100,
         httpVersion: cloudfront.HttpVersion.HTTP2,
         enableLogging: true,
+        errorResponses: [
+          {
+            httpStatus: 404,
+            responseHttpStatus: 200,
+            responsePagePath: "/index.html",
+            ttl: cdk.Duration.seconds(0),
+          },
+          {
+            httpStatus: 403,
+            responseHttpStatus: 200,
+            responsePagePath: "/index.html",
+            ttl: cdk.Duration.seconds(0),
+          },
+        ],
       },
     );
   }

@@ -1,4 +1,5 @@
 import * as s3 from "aws-cdk-lib/aws-s3";
+import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 
@@ -19,6 +20,8 @@ export class WebsiteS3Bucket extends Construct {
       autoDeleteObjects: true,
       encryption: s3.BucketEncryption.S3_MANAGED,
       enforceSSL: true,
+      websiteIndexDocument: "index.html",
+      websiteErrorDocument: "index.html",
     });
   }
 }
