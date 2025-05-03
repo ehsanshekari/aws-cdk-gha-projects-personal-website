@@ -46,7 +46,7 @@ jobs:
 
       - name: Bootstrap CDK (if needed)
         # run: cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.AWS_REGION }}
-        run: cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.AWS_REGION }}
+        run: cdk bootstrap
         working-directory: ./infra
 
       - name: Synth and Deploy CDK stack
