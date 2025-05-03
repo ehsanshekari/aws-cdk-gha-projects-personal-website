@@ -25,6 +25,8 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
+        with:
+          version: "10.0.0"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
