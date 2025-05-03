@@ -24,10 +24,10 @@ const app = new cdk.App();
 // });
 
 new InfraStack(app, "InfraStack", {
-  // env: {
-  //   account: process.env.CDK_DEFAULT_ACCOUNT,
-  //   region: process.env.CDK_DEFAULT_REGION,
-  // },
+  env: {
+    account: process.env.CDK_DEFAULT_ACCOUNT,
+    region: process.env.CDK_DEFAULT_REGION,
+  },
   domainName: domainName,
   bucketName: bucketName,
 });
