@@ -53,8 +53,7 @@ jobs:
         run: npm install -g aws-cdk
 
       - name: Bootstrap CDK (if needed)
-        # run: cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.AWS_REGION }}
-        run: cdk bootstrap
+        run: cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.AWS_REGION }}
         working-directory: ./infra
 
       - name: Synth and Deploy CDK stack
