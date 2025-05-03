@@ -40,3 +40,4 @@ jobs:
 
       - name: Destroy CDK stack
         run: cdk destroy --force
+        working-directory: ./infra
