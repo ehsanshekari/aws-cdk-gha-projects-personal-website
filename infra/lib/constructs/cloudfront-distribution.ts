@@ -1,13 +1,13 @@
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
-import { Construct } from "constructs";
 import * as cdk from "aws-cdk-lib";
+import { Construct } from "constructs";
 
-export interface WebsiteCloudFrontDistributionProps {
+interface WebsiteCloudFrontDistributionProps {
   readonly domainNames: string[];
   readonly certificate: acm.ICertificate;
-  readonly origin: origins.S3StaticWebsiteOrigin; // Changed from IOrigin to Origin
+  readonly origin: origins.S3StaticWebsiteOrigin;
 }
 
 export class WebsiteCloudFrontDistribution extends Construct {

@@ -3,7 +3,7 @@ import * as targets from "aws-cdk-lib/aws-route53-targets";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import { Construct } from "constructs";
 
-export interface WebsiteDnsRecordsProps {
+interface WebsiteDnsRecordsProps {
   readonly hostedZone: route53.IHostedZone;
   readonly distribution: cloudfront.Distribution;
   readonly domainName: string;

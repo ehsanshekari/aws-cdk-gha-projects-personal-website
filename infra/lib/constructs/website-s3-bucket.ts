@@ -1,9 +1,8 @@
 import * as s3 from "aws-cdk-lib/aws-s3";
-import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 
-export interface WebsiteS3BucketProps {
+interface WebsiteS3BucketProps {
   readonly bucketName: string;
 }
 

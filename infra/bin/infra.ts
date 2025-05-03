@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import * as cdk from "aws-cdk-lib";
-
-import { InfraStack } from "../lib/infra-stack";
+import { CertificateStack } from "../lib/stacks/certificate-stack";
+import { InfraStack } from "../lib/stacks/infra-stack";
 
 const domainName = process.env.DOMAIN_NAME || "ehsanshekari.com";
 const bucketName =
@@ -9,14 +9,20 @@ const bucketName =
 
 const app = new cdk.App();
 
+const certStack = new CertificateStack(app, "CertificateStack", {
+  env: {
+    account: process.env.CDK_DEFAULT_ACCOUNT,
+    region: "us-east-1",
+  },
+  domainName,
+});
+
 new InfraStack(app, "InfraStack", {
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION,
   },
-  // synthesizer: new cdk.DefaultStackSynthesizer({
-  //   qualifier: "mycustomqual", // Different from previous deployments
-  // }),
-  domainName: domainName,
-  bucketName: bucketName,
+  domainName,
+  bucketName,
+  certificateArn: certStack.certificate.certificateArn, // 🔁 pass certificate
 });
