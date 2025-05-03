@@ -25,4 +25,5 @@ new InfraStack(app, "InfraStack", {
   domainName,
   bucketName,
   certificateArn: certStack.certificateArn,
+  crossRegionReferences: true,
 });
