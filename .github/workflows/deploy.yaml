@@ -53,7 +53,7 @@ jobs:
         run: npm install -g aws-cdk
 
       - name: Bootstrap CDK (if needed)
-        run: cdk bootstrap
+        run: cdk bootstrap --force aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.AWS_REGION }}
         env:
           CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
           CDK_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
