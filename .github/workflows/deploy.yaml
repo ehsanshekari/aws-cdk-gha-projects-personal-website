@@ -35,16 +35,23 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           role-session-name: GitHubActions-CDK-${{ github.run_number }}
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Install CDK
-        run: pnpm add -g aws-cdk
-
-      - name: Bootstrap CDK (if needed)
-        run: cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }}
-
-      - name: Synth and Deploy
+      - name: list S3 Buckets
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION}}
         run: |
-          cdk synth
-          cdk deploy --require-approval never
+          echo "Listing S3 Buckets"
+          aws s3 ls
+
+    #   - name: Install dependencies
+    #     run: pnpm install --frozen-lockfile
+
+    #   - name: Install CDK
+    #     run: pnpm add -g aws-cdk
+
+    #   - name: Bootstrap CDK (if needed)
+    #     run: cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }}
+
+    #   - name: Synth and Deploy
+    #     run: |
+    #       cdk synth
+    #       cdk deploy --require-approval never
