@@ -37,6 +37,12 @@ jobs:
           echo "Listing S3 Buckets"
           aws s3 ls
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20" # or your preferred version
+          cache: "pnpm"
+
       - name: Install pnpm
         run: npm install -g pnpm
 
