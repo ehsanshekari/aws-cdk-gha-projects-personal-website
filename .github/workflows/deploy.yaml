@@ -37,16 +37,20 @@ jobs:
           echo "Listing S3 Buckets"
           aws s3 ls
 
-    #   - name: Install dependencies
-    #     run: pnpm install --frozen-lockfile
+      - name: Install pnpm
+        run: npm install -g pnpm
 
-    #   - name: Install CDK
-    #     run: pnpm add -g aws-cdk
+      - name: Install infra dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: ./infra
 
-    #   - name: Bootstrap CDK (if needed)
-    #     run: cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }}
+      - name: Bootstrap CDK (if needed)
+        # run: cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.AWS_REGION }}
+        run: cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.AWS_REGION }}
+        working-directory: ./infra
 
-    #   - name: Synth and Deploy
-    #     run: |
-    #       cdk synth
-    #       cdk deploy --require-approval never
+      - name: Synth and Deploy CDK stack
+        run: |
+          cdk synth
+          cdk deploy --all --require-approval never
+        working-directory: ./infra
