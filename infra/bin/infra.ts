@@ -3,7 +3,7 @@ import * as cdk from "aws-cdk-lib";
 
 import { InfraStack } from "../lib/infra-stack";
 
-const domainName = process.env.DOMAIN_NAME || "example.com";
+const domainName = process.env.DOMAIN_NAME || "ehsanshekari.com";
 const bucketName = process.env.BUCKET_NAME || "example-website-bucket";
 
 const app = new cdk.App();
