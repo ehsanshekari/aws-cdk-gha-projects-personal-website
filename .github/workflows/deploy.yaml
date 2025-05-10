@@ -60,7 +60,11 @@ jobs:
         working-directory: ./packages/client
 
       - name: Build React App
-        run: pnpm run build
+        run: |
+          ls
+          cd src
+          ls
+          pnpm run build
         working-directory: ./packages/client
 
       - name: Deploy React App to S3
