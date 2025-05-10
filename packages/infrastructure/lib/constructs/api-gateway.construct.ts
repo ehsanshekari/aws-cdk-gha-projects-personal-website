@@ -67,8 +67,8 @@ export class ApiGatewayConstruct extends Construct {
   }
 
   private createV1Resource(props: ApiGatewayConstructProps) {
-    const v1 = this.api.root.addResource("v1");
-    const api = v1.addResource("api");
+    const v1 = this.api.root.addResource("api");
+    const api = v1.addResource("v1");
 
     new V1RoutesConstruct(this, "V1Routes", {
       parentResource: api,
