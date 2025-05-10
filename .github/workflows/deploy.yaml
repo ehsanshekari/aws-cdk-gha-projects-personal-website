@@ -40,20 +40,20 @@ jobs:
 
       - name: Install infra dependencies
         run: pnpm i
-        working-directory: ./infrastructure
+        working-directory: ./packages/infrastructure
 
       - name: Bootstrap CDK (if needed)
         run: cdk bootstrap
         env:
           CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
           CDK_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
-        working-directory: ./infrastructure
+        working-directory: ./packages/infrastructure
 
       - name: Deploy CDK stack
         run: |
           cdk synth
           cdk deploy --all --require-approval never
-        working-directory: ./infrastructure
+        working-directory: ./packages/infrastructure
 
       - name: Install frontend dependencies
         run: pnpm i
