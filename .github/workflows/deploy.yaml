@@ -57,11 +57,11 @@ jobs:
 
       - name: Install frontend dependencies
         run: pnpm i
-        working-directory: ./client
+        working-directory: ./packages/client
 
       - name: Build React App
         run: pnpm run build
-        working-directory: ./client
+        working-directory: ./packages/client
 
       - name: Deploy React App to S3
         run: |
