@@ -5,7 +5,7 @@ import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import { ICertificate } from "aws-cdk-lib/aws-certificatemanager";
 
 import { V1RoutesConstruct } from "./v1-routes.construct";
-import { stageType, StageType } from "../../config/constants";
+import { StageType } from "../../config/constants";
 
 interface ApiGatewayConstructProps {
   stageName: StageType;
@@ -67,7 +67,7 @@ export class ApiGatewayConstruct extends Construct {
   }
 
   private createV1Resource(props: ApiGatewayConstructProps) {
-    const v1 = this.api.root.addResource("v1");
+    const v1 = this.api.root.addResource("v1/api");
 
     new V1RoutesConstruct(this, "V1Routes", {
       parentResource: v1,
