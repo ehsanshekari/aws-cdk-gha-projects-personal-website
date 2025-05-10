@@ -5,7 +5,7 @@ import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import { ICertificate } from "aws-cdk-lib/aws-certificatemanager";
 
 import { V1RoutesConstruct } from "./v1-routes.construct";
-import { StageType } from "../../config/constants";
+import { stageType, StageType } from "../../config/constants";
 
 interface ApiGatewayConstructProps {
   stageName: StageType;
@@ -57,6 +57,7 @@ export class ApiGatewayConstruct extends Construct {
       domainName: domain,
       restApi: this.api,
       stage: this.api.deploymentStage,
+      basePath: props.stageName,
     });
 
     new cdk.CfnOutput(this, "OriolaHubApiUrl", {
