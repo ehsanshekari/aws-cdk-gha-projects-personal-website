@@ -3,6 +3,7 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
+
 import { StageType } from "../../config/constants";
 
 const BASE_FUNCTION_PROPS = {
@@ -35,7 +36,7 @@ export class LambdaConstruct extends Construct {
         "..",
         "..",
         "..",
-        "api",
+        "lambda-api",
         "entrypoints",
         "users",
         "signup.handler.ts"
@@ -56,7 +57,7 @@ export class LambdaConstruct extends Construct {
         "..",
         "..",
         "..",
-        "api",
+        "lambda-api",
         "entrypoints",
         "sessions",
         "login.handler.ts"
@@ -77,7 +78,7 @@ export class LambdaConstruct extends Construct {
         "..",
         "..",
         "..",
-        "api",
+        "lambda-api",
         "entrypoints",
         "sessions",
         "logout.handler.ts"
