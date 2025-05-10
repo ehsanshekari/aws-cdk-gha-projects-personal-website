@@ -20,6 +20,10 @@ export class V1RoutesConstruct extends Construct {
       "POST",
       new apigateway.LambdaIntegration(props.signUpLambda)
     );
+    users.addMethod(
+      "GET",
+      new apigateway.LambdaIntegration(props.signUpLambda)
+    );
     sessions.addMethod(
       "POST",
       new apigateway.LambdaIntegration(props.loginLambda)
