@@ -18,7 +18,7 @@ export class WebAppS3BucketConstruct extends Construct {
     super(scope, id);
 
     this.bucket = new Bucket(this, "HubWebAppBucket", {
-      bucketName: `hub-web-app-${props.stageName}`,
+      bucketName: `ehsan-hub-web-app-${props.stageName}`,
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
       removalPolicy: RemovalPolicy.RETAIN,
     });
