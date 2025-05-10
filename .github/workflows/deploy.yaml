@@ -36,7 +36,7 @@ jobs:
         run: npm install -g pnpm
 
       - name: Install AWS CDK CLI
-        run: pnpm install -g aws-cdk
+        run: npm install -g aws-cdk
 
       - name: Install infra dependencies
         run: pnpm i
