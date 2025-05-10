@@ -46,6 +46,7 @@ export class CloudfrontConstruct extends Construct {
       additionalBehaviors: {
         "/api/*": {
           origin: apiOrigin,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
           viewerProtocolPolicy:
             cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
