@@ -1,0 +1,68 @@
+name: Deployment
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install AWS CDK CLI
+        run: pnpm install -g aws-cdk
+
+      - name: Install infra dependencies
+        run: pnpm i
+        working-directory: ./infrastructure
+
+      - name: Bootstrap CDK (if needed)
+        run: cdk bootstrap
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+          CDK_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+        working-directory: ./infrastructure
+
+      - name: Deploy CDK stack
+        run: |
+          cdk synth
+          cdk deploy --all --require-approval never
+        working-directory: ./infrastructure
+
+      - name: Install frontend dependencies
+        run: pnpm i
+        working-directory: ./client
+
+      - name: Build React App
+        run: pnpm run build
+        working-directory: ./client
+
+      - name: Deploy React App to S3
+        run: |
+          aws s3 sync ./client/dist s3://hub-web-app-apps-app-dev/ --delete

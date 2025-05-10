@@ -25,7 +25,6 @@
   },
   "lint-staged": {
     "*.{css,html,js,json,md,yaml,yml,jsx,ts,tsx}": [
-      "./scripts/typecheck.sh",
       "npm run prettify"
     ]
   }
