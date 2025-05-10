@@ -55,20 +55,6 @@ jobs:
           cdk deploy --all --require-approval never
         working-directory: ./packages/infrastructure
 
-      - name: Install frontend dependencies
-        run: pnpm i
-        working-directory: ./packages/client
-
-      - name: Build React App
-        run: |
-          ls
-          echo "cd src"
-          cd src
-          echo "ls inside src"
-          ls
-          pnpm run build
-        working-directory: ./packages/client
-
       - name: Deploy React App to S3
         run: |
-          aws s3 sync ./client/dist s3://hub-web-app-apps-app-dev/ --delete
+          aws s3 sync ./packages/client/dist s3://ehsan-hub-web-app-dev/ --delete
