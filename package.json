@@ -1,0 +1,32 @@
+{
+  "name": "sample-project",
+  "version": "0.1.0",
+  "scripts": {
+    "clean": "rimraf --glob \"node_modules\" \"**/node_modules\"",
+    "prettier-check": "prettier -c --ignore-path .gitignore \"**/*.{css,html,js,json,md,yaml,yml,jsx,ts,tsx}\"",
+    "prettify": "prettier --write --ignore-path .gitignore \"**/*.{css,html,js,json,md,yaml,yml,jsx,ts,tsx}\"",
+    "prepare": "husky"
+  },
+  "keywords": [],
+  "author": "Ehsan Shekari",
+  "license": "ISC",
+  "description": "",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "19.8.0",
+    "@commitlint/config-conventional": "19.8.0",
+    "husky": "9.1.7",
+    "lint-staged": "15.2.0",
+    "prettier": "3.2.5",
+    "rimraf": "6.0.1"
+  },
+  "lint-staged": {
+    "*.{css,html,js,json,md,yaml,yml,jsx,ts,tsx}": [
+      "./scripts/typecheck.sh",
+      "npm run prettify"
+    ]
+  }
+}
