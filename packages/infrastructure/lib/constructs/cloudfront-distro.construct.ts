@@ -22,6 +22,8 @@ export interface CloudfrontConstructProps {
 }
 
 export class CloudfrontConstruct extends Construct {
+  public readonly distribution: cloudfront.Distribution;
+
   constructor(scope: Construct, id: string, props: CloudfrontConstructProps) {
     super(scope, id);
 
@@ -86,5 +88,7 @@ export class CloudfrontConstruct extends Construct {
       value: distribution.distributionId,
       exportName: "HubCloudFrontDistributionId",
     });
+
+    this.distribution = distribution;
   }
 }

@@ -9,6 +9,7 @@ import { ApiGatewayConstruct } from "./constructs/api-gateway.construct";
 import { WebAppS3BucketConstruct } from "./constructs/s3-bucket.constructs";
 import { CloudfrontConstruct } from "./constructs/cloudfront-distro.construct";
 import { ApiGatewayReginalACMCertificate } from "./constructs/acm-certificate.construct";
+import { WebsiteDnsRecords } from "./constructs/route53-records.construct";
 
 interface InfrastructureStackProps extends cdk.StackProps {
   stageName: StageType;
@@ -73,12 +74,18 @@ export class InfrastructureStack extends cdk.Stack {
       CERTIFICATE_ARN
     );
 
-    new CloudfrontConstruct(this, "HubWebAppDistribution", {
+    const distro = new CloudfrontConstruct(this, "HubWebAppDistribution", {
       domainName: DOMAIN_NAME,
       certificate,
       bucket: clientS3Bucket.bucket,
       apiDomainName: apiGateway.apiDomain,
       stageName: stageName,
+    });
+
+    new WebsiteDnsRecords(this, "WebsiteDnsRecords", {
+      hostedZone,
+      distribution: distro.distribution,
+      domainName: DOMAIN_NAME,
     });
   }
 }
