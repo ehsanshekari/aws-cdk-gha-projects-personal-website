@@ -43,6 +43,7 @@ export class ApiGatewayConstruct extends Construct {
       deployOptions: {
         stageName: props.stageName,
       },
+      endpointConfiguration: { types: [apigateway.EndpointType.REGIONAL] },
     });
 
     const domain = new apigateway.DomainName(this, "OriolaHubDomain", {

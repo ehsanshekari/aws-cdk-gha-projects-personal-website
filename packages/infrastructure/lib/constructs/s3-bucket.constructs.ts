@@ -20,7 +20,7 @@ export class WebAppS3BucketConstruct extends Construct {
     this.bucket = new Bucket(this, "HubWebAppBucket", {
       bucketName: `ehsan-hub-web-app-${props.stageName}`,
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
-      removalPolicy: RemovalPolicy.RETAIN,
+      removalPolicy: RemovalPolicy.DESTROY,
     });
   }
 }
