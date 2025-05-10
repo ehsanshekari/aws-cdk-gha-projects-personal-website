@@ -62,7 +62,9 @@ jobs:
       - name: Build React App
         run: |
           ls
+          echo "cd src"
           cd src
+          echo "ls inside src"
           ls
           pnpm run build
         working-directory: ./packages/client
