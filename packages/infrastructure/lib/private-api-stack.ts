@@ -8,6 +8,7 @@ import {
   aws_iam as iam,
   aws_route53 as route53,
   aws_route53_targets as targets,
+  aws_certificatemanager as acm,
   Duration,
 } from "aws-cdk-lib";
 import { Construct } from "constructs";
@@ -16,7 +17,7 @@ export class PrivateApiStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    // 1. VPC
+    // 1. VPC Configuration
     const vpc = new ec2.Vpc(this, "CustomVpc", {
       maxAzs: 2,
       subnetConfiguration: [
@@ -34,7 +35,7 @@ export class PrivateApiStack extends Stack {
       natGateways: 1,
     });
 
-    // 2. Lambda
+    // 2. Lambda Function
     const fn = new lambda.Function(this, "PrivateApiLambda", {
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: "index.handler",
@@ -52,7 +53,7 @@ export class PrivateApiStack extends Stack {
       },
     });
 
-    // 3. Interface VPC Endpoint for API Gateway
+    // 3. API Gateway VPC Endpoint
     const apiGatewayVpce = new ec2.InterfaceVpcEndpoint(this, "ApiGwVpce", {
       vpc,
       service: ec2.InterfaceVpcEndpointAwsService.APIGATEWAY,
@@ -62,7 +63,7 @@ export class PrivateApiStack extends Stack {
       },
     });
 
-    // 4. Private API Gateway
+    // 4. Private REST API
     const api = new apigw.RestApi(this, "PrivateApi", {
       restApiName: "PrivateApiGateway",
       endpointConfiguration: {
@@ -72,12 +73,12 @@ export class PrivateApiStack extends Stack {
       deployOptions: {
         stageName: "dev",
       },
+      disableExecuteApiEndpoint: true, // Force use of custom domain
     });
 
-    // 5. Lambda Integration
+    // 5. API Gateway Resources and Methods
     const integration = new apigw.LambdaIntegration(fn);
-    const resource = api.root.addResource("hello");
-    resource.addMethod("GET", integration);
+    api.root.addResource("hello").addMethod("GET", integration);
 
     // 6. Resource Policy
     const apiGatewayRestApi = api.node.defaultChild as apigw.CfnRestApi;
@@ -107,22 +108,52 @@ export class PrivateApiStack extends Stack {
       }
     );
 
-    // 8. DNS Record - point api.internal.com to VPC Endpoint DNS name
-    new route53.CnameRecord(this, "PrivateApiCnameRecord", {
+    // 8. SSL Certificate
+    const certificate = new acm.Certificate(this, "PrivateApiCertificate", {
+      domainName: "api.internal.com",
+      validation: acm.CertificateValidation.fromDns(hostedZone),
+    });
+
+    // 9. Custom Domain Name
+    const domainName = new apigw.DomainName(this, "PrivateApiDomain", {
+      domainName: "api.internal.com",
+      certificate,
+      endpointType: apigw.EndpointType.PRIVATE,
+      securityPolicy: apigw.SecurityPolicy.TLS_1_2,
+    });
+
+    // 10. API Mapping
+    new apigw.BasePathMapping(this, "ApiMapping", {
+      domainName,
+      restApi: api,
+      stage: api.deploymentStage,
+    });
+
+    // 11. DNS Records
+    new route53.ARecord(this, "PrivateApiARecord", {
       zone: hostedZone,
-      recordName: "api", // api.internal.com
-      domainName: apiGatewayVpce.vpcEndpointDnsEntries[0],
+      recordName: "api",
+      target: route53.RecordTarget.fromAlias(
+        new targets.ApiGatewayDomain(domainName)
+      ),
       ttl: Duration.minutes(5),
     });
 
-    // 9. Outputs
+    // 12. Outputs
     new CfnOutput(this, "InvokeUrl", {
       value: `https://api.internal.com/dev/hello`,
+      description: "URL to invoke the private API",
       exportName: "PrivateApiInvokeUrl",
     });
 
     new CfnOutput(this, "VpcEndpointDns", {
       value: apiGatewayVpce.vpcEndpointDnsEntries[0],
+      description: "DNS name of the API Gateway VPC Endpoint",
+    });
+
+    new CfnOutput(this, "HostedZoneName", {
+      value: hostedZone.zoneName,
+      description: "Name of the private hosted zone",
     });
   }
 }
