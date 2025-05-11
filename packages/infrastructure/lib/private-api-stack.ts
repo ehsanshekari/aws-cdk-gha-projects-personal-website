@@ -70,11 +70,17 @@ export class PrivateApiStack extends cdk.Stack {
       validation: acm.CertificateValidation.fromDns(hostedZone),
     });
 
-    // 6. Create API Gateway REST API (PRIVATE)
+    // 6. Create API Gateway REST API (PRIVATE) with Custom Domain
     const api = new apigw.RestApi(this, "PrivateApi", {
       endpointConfiguration: {
         types: [apigw.EndpointType.PRIVATE],
         vpcEndpoints: [vpcEndpoint],
+      },
+      domainName: {
+        domainName: "api.internal.com",
+        certificate,
+        endpointType: apigw.EndpointType.REGIONAL,
+        securityPolicy: apigw.SecurityPolicy.TLS_1_2,
       },
       policy: new iam.PolicyDocument({
         statements: [
@@ -100,38 +106,16 @@ export class PrivateApiStack extends cdk.Stack {
     const integration = new apigw.LambdaIntegration(handler);
     api.root.addMethod("GET", integration);
 
-    // 8. Create custom domain and set it as the default domain for the API
-    const apiDomain = new apigw.DomainName(this, "ApiDomainName", {
-      domainName: "api.internal.com",
-      certificate,
-      endpointType: apigw.EndpointType.REGIONAL, // Use REGIONAL for domain
-      securityPolicy: apigw.SecurityPolicy.TLS_1_2,
-    });
-
-    // Associate the custom domain with the API
-    api.addDomainName("DefaultDomain", {
-      domainName: "api.internal.com",
-      certificate,
-      endpointType: apigw.EndpointType.REGIONAL,
-    });
-
-    // 9. Map the domain to the API
-    new apigw.BasePathMapping(this, "ApiBasePathMapping", {
-      domainName: apiDomain,
-      restApi: api,
-      stage: api.deploymentStage,
-    });
-
-    // 10. Create DNS Record
+    // 8. Create DNS Record pointing to the API's custom domain
     new route53.ARecord(this, "AliasRecord", {
       zone: hostedZone,
       recordName: "api",
       target: route53.RecordTarget.fromAlias(
-        new targets.ApiGatewayDomain(apiDomain)
+        new targets.ApiGatewayDomain(api.domainName!)
       ),
     });
 
-    // 11. Outputs
+    // 9. Outputs
     new cdk.CfnOutput(this, "ApiUrl", {
       value: `https://api.internal.com/prod`,
       description: "Private API URL",
