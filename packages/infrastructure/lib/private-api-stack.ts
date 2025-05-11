@@ -70,7 +70,15 @@ export class PrivateApiStack extends cdk.Stack {
       validation: acm.CertificateValidation.fromDns(hostedZone),
     });
 
-    // 6. Create API Gateway REST API (PRIVATE)
+    // 6. Create Custom Domain Name FIRST
+    const domainName = new apigw.DomainName(this, "DomainName", {
+      domainName: "api.internal.com",
+      certificate,
+      endpointType: apigw.EndpointType.PRIVATE,
+      securityPolicy: apigw.SecurityPolicy.TLS_1_2,
+    });
+
+    // 7. Create API Gateway REST API (PRIVATE)
     const api = new apigw.RestApi(this, "PrivateApi", {
       endpointConfiguration: {
         types: [apigw.EndpointType.PRIVATE],
@@ -96,22 +104,13 @@ export class PrivateApiStack extends cdk.Stack {
       },
     });
 
-    // 7. Add Lambda Integration
+    // 8. Add Lambda Integration
     const integration = new apigw.LambdaIntegration(handler);
     api.root.addMethod("GET", integration);
 
-    // 8. Create Custom Domain Name
-    const domainName = new apigw.DomainName(this, "DomainName", {
-      domainName: "api.internal.com",
-      certificate,
-      endpointType: apigw.EndpointType.PRIVATE,
-      securityPolicy: apigw.SecurityPolicy.TLS_1_2,
-    });
-
-    // 9. Create Base Path Mapping
-    new apigw.BasePathMapping(this, "BasePathMapping", {
-      domainName,
-      restApi: api,
+    // 9. Create Base Path Mapping AFTER domain and API are created
+    domainName.addBasePathMapping(api, {
+      basePath: "prod",
       stage: api.deploymentStage,
     });
 
