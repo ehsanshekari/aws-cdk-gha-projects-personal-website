@@ -42,7 +42,7 @@ export class PrivateApiStack extends Stack {
         exports.handler = async () => {
           return {
             statusCode: 200,
-            body: "Private Hello from Lambda"
+            body: "Private Hello from Lambda, What is this?!"
           };
         };
       `),
