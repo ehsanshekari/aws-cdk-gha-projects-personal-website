@@ -1,6 +1,8 @@
 import {
   Stack,
   StackProps,
+  CfnOutput,
+  Fn,
   aws_apigateway as apigw,
   aws_lambda as lambda,
   aws_ec2 as ec2,
@@ -92,7 +94,23 @@ export class PrivateApiStack extends Stack {
       ],
     }).toJSON();
 
-    // 7. (Optional) Private DNS with Route53
+    // 7. Outputs for cross-stack usage
+    new CfnOutput(this, "ApiGatewayId", {
+      value: api.restApiId,
+      exportName: "PrivateApiGatewayId",
+    });
+
+    new CfnOutput(this, "ApiGatewayRootResourceId", {
+      value: api.root.resourceId,
+      exportName: "PrivateApiGatewayRootResourceId",
+    });
+
+    new CfnOutput(this, "ApiGatewayUrl", {
+      value: api.url ?? "unknown",
+      exportName: "PrivateApiGatewayUrl",
+    });
+
+    // 8. (Optional) Private DNS with Route53
     // const hostedZone = new route53.PrivateHostedZone(this, 'InternalHostedZone', {
     //   zoneName: 'internal.example.com',
     //   vpc,
