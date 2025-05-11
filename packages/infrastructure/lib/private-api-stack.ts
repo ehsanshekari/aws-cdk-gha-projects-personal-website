@@ -103,29 +103,29 @@ export class PrivateApiStack extends Stack {
       exportName: "PrivateApiGatewayId",
     });
 
-    new CfnOutput(this, "ApiGatewayRootResourceId", {
-      value: api.root.resourceId,
-      exportName: "PrivateApiGatewayRootResourceId",
-    });
+    // new CfnOutput(this, "ApiGatewayRootResourceId", {
+    //   value: api.root.resourceId,
+    //   exportName: "PrivateApiGatewayRootResourceId",
+    // });
 
-    new CfnOutput(this, "ApiGatewayUrl", {
-      value: api.url ?? "unknown",
-      exportName: "PrivateApiGatewayUrl",
-    });
+    // new CfnOutput(this, "ApiGatewayUrl", {
+    //   value: api.url ?? "unknown",
+    //   exportName: "PrivateApiGatewayUrl",
+    // });
 
-    const hostedZone = new route53.PrivateHostedZone(
-      this,
-      "InternalHostedZone",
-      {
-        zoneName: "internal.com",
-        vpc,
-      }
-    );
+    // const hostedZone = new route53.PrivateHostedZone(
+    //   this,
+    //   "InternalHostedZone",
+    //   {
+    //     zoneName: "internal.com",
+    //     vpc,
+    //   }
+    // );
 
-    new route53.ARecord(this, "ApiAliasRecord", {
-      zone: hostedZone,
-      recordName: "api.internal.com",
-      target: route53.RecordTarget.fromAlias(new targets.ApiGateway(api)),
-    });
+    // new route53.ARecord(this, "ApiAliasRecord", {
+    //   zone: hostedZone,
+    //   recordName: "api.internal.com",
+    //   target: route53.RecordTarget.fromAlias(new targets.ApiGateway(api)),
+    // });
   }
 }
