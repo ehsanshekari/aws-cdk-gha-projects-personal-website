@@ -131,10 +131,6 @@ export class PrivateApiStack extends cdk.Stack {
       value: vpcEndpoint.vpcEndpointId,
     });
 
-    new cdk.CfnOutput(this, "ApiEndpointType", {
-      value: api.endpointConfiguration?.types?.join(",") ?? "none",
-    });
-
     new cdk.CfnOutput(this, "ApiInvokeUrl", {
       value: `https://${fullDomain}/prod/hello`,
       description: "Use this from within the VPC only",
