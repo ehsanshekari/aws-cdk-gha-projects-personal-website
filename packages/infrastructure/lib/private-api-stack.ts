@@ -63,7 +63,23 @@ export class PrivateApiStack extends Stack {
       },
     });
 
-    // 4. Private REST API
+    // 4. Private Hosted Zone
+    const hostedZone = new route53.PrivateHostedZone(
+      this,
+      "InternalHostedZone",
+      {
+        zoneName: "internal.com",
+        vpc,
+      }
+    );
+
+    // 5. SSL Certificate
+    const certificate = new acm.Certificate(this, "PrivateApiCertificate", {
+      domainName: "api.internal.com",
+      validation: acm.CertificateValidation.fromDns(hostedZone),
+    });
+
+    // 6. Private REST API - Now with proper domain name configuration
     const api = new apigw.RestApi(this, "PrivateApi", {
       restApiName: "PrivateApiGateway",
       endpointConfiguration: {
@@ -73,14 +89,14 @@ export class PrivateApiStack extends Stack {
       deployOptions: {
         stageName: "dev",
       },
-      disableExecuteApiEndpoint: true, // Force use of custom domain
+      // Important: We'll handle the domain name separately
     });
 
-    // 5. API Gateway Resources and Methods
+    // 7. API Gateway Resources and Methods
     const integration = new apigw.LambdaIntegration(fn);
     api.root.addResource("hello").addMethod("GET", integration);
 
-    // 6. Resource Policy
+    // 8. Resource Policy
     const apiGatewayRestApi = api.node.defaultChild as apigw.CfnRestApi;
     apiGatewayRestApi.policy = new iam.PolicyDocument({
       statements: [
@@ -98,38 +114,16 @@ export class PrivateApiStack extends Stack {
       ],
     }).toJSON();
 
-    // 7. Private Hosted Zone
-    const hostedZone = new route53.PrivateHostedZone(
-      this,
-      "InternalHostedZone",
-      {
-        zoneName: "internal.com",
-        vpc,
-      }
-    );
-
-    // 8. SSL Certificate
-    const certificate = new acm.Certificate(this, "PrivateApiCertificate", {
-      domainName: "api.internal.com",
-      validation: acm.CertificateValidation.fromDns(hostedZone),
-    });
-
-    // 9. Custom Domain Name
+    // 9. Custom Domain Name - The correct way to set it up
     const domainName = new apigw.DomainName(this, "PrivateApiDomain", {
       domainName: "api.internal.com",
       certificate,
       endpointType: apigw.EndpointType.PRIVATE,
       securityPolicy: apigw.SecurityPolicy.TLS_1_2,
+      mapping: api, // This connects the domain to our API
     });
 
-    // 10. API Mapping
-    new apigw.BasePathMapping(this, "ApiMapping", {
-      domainName,
-      restApi: api,
-      stage: api.deploymentStage,
-    });
-
-    // 11. DNS Records
+    // 10. DNS Records
     new route53.ARecord(this, "PrivateApiARecord", {
       zone: hostedZone,
       recordName: "api",
@@ -139,7 +133,7 @@ export class PrivateApiStack extends Stack {
       ttl: Duration.minutes(5),
     });
 
-    // 12. Outputs
+    // 11. Outputs
     new CfnOutput(this, "InvokeUrl", {
       value: `https://api.internal.com/dev/hello`,
       description: "URL to invoke the private API",
@@ -149,11 +143,6 @@ export class PrivateApiStack extends Stack {
     new CfnOutput(this, "VpcEndpointDns", {
       value: apiGatewayVpce.vpcEndpointDnsEntries[0],
       description: "DNS name of the API Gateway VPC Endpoint",
-    });
-
-    new CfnOutput(this, "HostedZoneName", {
-      value: hostedZone.zoneName,
-      description: "Name of the private hosted zone",
     });
   }
 }
