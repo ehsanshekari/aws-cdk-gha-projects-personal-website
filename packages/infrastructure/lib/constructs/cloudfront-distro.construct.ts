@@ -55,18 +55,18 @@ export class CloudfrontConstruct extends Construct {
       },
       defaultRootObject: "index.html",
       errorResponses: [
-        // {
-        //   httpStatus: 403,
-        //   responseHttpStatus: 200,
-        //   responsePagePath: "/index.html",
-        //   ttl: Duration.seconds(300),
-        // },
-        // {
-        //   httpStatus: 404,
-        //   responseHttpStatus: 200,
-        //   responsePagePath: "/index.html",
-        //   ttl: Duration.seconds(300),
-        // },
+        {
+          httpStatus: 403,
+          responseHttpStatus: 200,
+          responsePagePath: "/index.html",
+          ttl: Duration.seconds(300),
+        },
+        {
+          httpStatus: 404,
+          responseHttpStatus: 200,
+          responsePagePath: "/index.html",
+          ttl: Duration.seconds(300),
+        },
       ],
       domainNames: [domainName],
       certificate: certificate,
