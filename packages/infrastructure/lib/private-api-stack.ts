@@ -70,17 +70,11 @@ export class PrivateApiStack extends cdk.Stack {
       validation: acm.CertificateValidation.fromDns(hostedZone),
     });
 
-    // 6. Create API Gateway REST API (PRIVATE) with Custom Domain
+    // 6. Create API Gateway REST API (PRIVATE)
     const api = new apigw.RestApi(this, "PrivateApi", {
       endpointConfiguration: {
         types: [apigw.EndpointType.PRIVATE],
         vpcEndpoints: [vpcEndpoint],
-      },
-      domainName: {
-        domainName: "api.internal.com",
-        certificate,
-        endpointType: apigw.EndpointType.REGIONAL,
-        securityPolicy: apigw.SecurityPolicy.TLS_1_2,
       },
       policy: new iam.PolicyDocument({
         statements: [
@@ -102,16 +96,26 @@ export class PrivateApiStack extends cdk.Stack {
       },
     });
 
-    // 7. Add Lambda Integration
-    const integration = new apigw.LambdaIntegration(handler);
-    api.root.addMethod("GET", integration);
+    // 7. Create and attach the custom domain name
+    const apiDomain = new apigw.DomainName(this, "ApiDomainName", {
+      domainName: "api.internal.com",
+      certificate,
+      endpointType: apigw.EndpointType.REGIONAL,
+      securityPolicy: apigw.SecurityPolicy.TLS_1_2,
+    });
 
-    // 8. Create DNS Record pointing to the API's custom domain
+    // Explicitly map the root path to the API stage
+    apiDomain.addBasePathMapping(api, {
+      basePath: "", // Empty base path makes this the default domain
+      stage: api.deploymentStage,
+    });
+
+    // 8. Create DNS Record
     new route53.ARecord(this, "AliasRecord", {
       zone: hostedZone,
       recordName: "api",
       target: route53.RecordTarget.fromAlias(
-        new targets.ApiGatewayDomain(api.domainName!)
+        new targets.ApiGatewayDomain(apiDomain)
       ),
     });
 
