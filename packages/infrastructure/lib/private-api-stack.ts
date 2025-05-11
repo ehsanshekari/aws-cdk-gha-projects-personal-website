@@ -14,9 +14,22 @@ export class PrivateApiStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    // 1. Get or create a VPC
-    const vpc = ec2.Vpc.fromLookup(this, "Vpc", {
-      isDefault: true, // Or change to your custom VPC
+    // 1. Create a Custom VPC
+    const vpc = new ec2.Vpc(this, "CustomVpc", {
+      maxAzs: 2,
+      subnetConfiguration: [
+        {
+          cidrMask: 24,
+          name: "private-subnet",
+          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+        },
+        {
+          cidrMask: 24,
+          name: "public-subnet",
+          subnetType: ec2.SubnetType.PUBLIC,
+        },
+      ],
+      natGateways: 1,
     });
 
     // 2. Lambda function inside the VPC (use PRIVATE_WITH_EGRESS subnets)
@@ -76,7 +89,7 @@ export class PrivateApiStack extends Stack {
       })
     );
 
-    // // 7. (Optional) Private DNS with Route53
+    // 7. (Optional) Private DNS with Route53
     // const hostedZone = new route53.PrivateHostedZone(this, 'InternalHostedZone', {
     //   zoneName: 'internal.example.com',
     //   vpc,
