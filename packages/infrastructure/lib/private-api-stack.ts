@@ -19,7 +19,7 @@ export class PrivateApiStack extends Stack {
       isDefault: true, // Or change to your custom VPC
     });
 
-    // 2. Lambda function inside the VPC
+    // 2. Lambda function inside the VPC (use PRIVATE_WITH_EGRESS subnets)
     const fn = new lambda.Function(this, "PrivateApiLambda", {
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: "index.handler",
@@ -32,6 +32,9 @@ export class PrivateApiStack extends Stack {
         };
       `),
       vpc,
+      vpcSubnets: {
+        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+      },
     });
 
     // 3. Create Interface VPC Endpoint for API Gateway
