@@ -69,6 +69,9 @@ export class PrivateApiStack extends Stack {
         types: [apigw.EndpointType.PRIVATE],
         vpcEndpoints: [apiGatewayVpce],
       },
+      deployOptions: {
+        stageName: "dev",
+      },
     });
 
     // 5. Lambda integration + route
