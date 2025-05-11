@@ -100,9 +100,7 @@ export class PrivateApiStack extends cdk.Stack {
     // 7. Add Lambda Integration
     const integration = new apigw.LambdaIntegration(handler);
     api.root.addMethod("GET", integration);
-
     // 8. Create custom domain AFTER the API is fully configured
-    // This approach explicitly separates the API creation from domain configuration
     const apiDomain = new apigw.DomainName(this, "ApiDomainName", {
       domainName: "api.internal.com",
       certificate,
@@ -115,6 +113,13 @@ export class PrivateApiStack extends cdk.Stack {
       domainName: apiDomain,
       restApi: api,
       stage: api.deploymentStage,
+    });
+
+    // Set the custom domain as the default domain for the API
+    api.addDomainName("DefaultDomain", {
+      domainName: "api.internal.com",
+      certificate,
+      endpointType: apigw.EndpointType.REGIONAL,
     });
 
     // 10. Create DNS Record
