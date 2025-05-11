@@ -15,7 +15,7 @@
 // });
 
 import { App } from "aws-cdk-lib";
-import { PrivateApiStack } from "../lib/private-api-stack";
+import { PrivateApiStack } from "../lib/private-api-stack-bk";
 
 const app = new App();
 new PrivateApiStack(app, "PrivateApiStack", {
