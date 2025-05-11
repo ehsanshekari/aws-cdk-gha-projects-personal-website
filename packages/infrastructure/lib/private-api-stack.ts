@@ -70,7 +70,7 @@ export class PrivateApiStack extends cdk.Stack {
       validation: acm.CertificateValidation.fromDns(hostedZone),
     });
 
-    // 6. API Gateway - Private type
+    // 6. API Gateway - Private type with custom domain
     const api = new apigw.RestApi(this, "PrivateApi", {
       endpointConfiguration: {
         types: [apigw.EndpointType.PRIVATE],
@@ -94,35 +94,26 @@ export class PrivateApiStack extends cdk.Stack {
       deployOptions: {
         stageName: "prod",
       },
+      domainName: {
+        domainName: fullDomain,
+        certificate,
+        endpointType: apigw.EndpointType.REGIONAL,
+        securityPolicy: apigw.SecurityPolicy.TLS_1_2,
+      },
     });
 
     // 7. Integration and resource/method
     const resource = api.root.addResource("hello");
     resource.addMethod("GET", new apigw.LambdaIntegration(handler));
 
-    // 8. Custom domain (must be defined separately from RestApi)
-    const apiDomain = new apigw.DomainName(this, "CustomDomain", {
-      domainName: fullDomain,
-      certificate,
-      endpointType: apigw.EndpointType.REGIONAL,
-      securityPolicy: apigw.SecurityPolicy.TLS_1_2,
-    });
-
-    apiDomain.addBasePathMapping(api, {
-      basePath: "",
-      stage: api.deploymentStage,
-    });
-
-    // 9. Route 53 alias record using the domain object (not API)
+    // 8. Route 53 alias record using the API
     new route53.ARecord(this, "AliasRecord", {
       zone: hostedZone,
       recordName: subdomain,
-      target: route53.RecordTarget.fromAlias(
-        new targets.ApiGatewayDomain(apiDomain)
-      ),
+      target: route53.RecordTarget.fromAlias(new targets.ApiGateway(api)),
     });
 
-    // 10. Debug outputs to trace issues
+    // 9. Debug outputs to trace issues
     new cdk.CfnOutput(this, "DomainName", {
       value: fullDomain,
     });
