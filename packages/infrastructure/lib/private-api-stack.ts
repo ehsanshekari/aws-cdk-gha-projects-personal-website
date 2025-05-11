@@ -74,20 +74,23 @@ export class PrivateApiStack extends Stack {
     const resource = api.root.addResource("hello");
     resource.addMethod("GET", integration);
 
-    // 6. Add Resource Policy to restrict to the VPC Endpoint
-    api.addToResourcePolicy(
-      new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        principals: [new iam.AnyPrincipal()],
-        actions: ["execute-api:Invoke"],
-        resources: [`${api.arnForExecuteApi()}/*`],
-        conditions: {
-          StringEquals: {
-            "aws:SourceVpce": apiGatewayVpce.vpcEndpointId,
+    // 6. Add Resource Policy to restrict to the VPC Endpoint (FIXED)
+    const apiGatewayRestApi = api.node.defaultChild as apigw.CfnRestApi;
+    apiGatewayRestApi.policy = new iam.PolicyDocument({
+      statements: [
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          principals: [new iam.AnyPrincipal()],
+          actions: ["execute-api:Invoke"],
+          resources: ["execute-api:/*"],
+          conditions: {
+            StringEquals: {
+              "aws:SourceVpce": apiGatewayVpce.vpcEndpointId,
+            },
           },
-        },
-      })
-    );
+        }),
+      ],
+    }).toJSON();
 
     // 7. (Optional) Private DNS with Route53
     // const hostedZone = new route53.PrivateHostedZone(this, 'InternalHostedZone', {
