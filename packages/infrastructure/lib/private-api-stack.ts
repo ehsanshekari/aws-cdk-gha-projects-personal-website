@@ -70,7 +70,7 @@ export class PrivateApiStack extends cdk.Stack {
       validation: acm.CertificateValidation.fromDns(hostedZone),
     });
 
-    // 6. Create API Gateway REST API (PRIVATE) - WITHOUT domain configuration first
+    // 6. Create API Gateway REST API (PRIVATE)
     const api = new apigw.RestApi(this, "PrivateApi", {
       endpointConfiguration: {
         types: [apigw.EndpointType.PRIVATE],
@@ -94,22 +94,21 @@ export class PrivateApiStack extends cdk.Stack {
       deployOptions: {
         stageName: "prod",
       },
-      // Remove the domain name configuration from here
     });
 
     // 7. Add Lambda Integration
     const integration = new apigw.LambdaIntegration(handler);
     api.root.addMethod("GET", integration);
 
-    // 8. Create custom domain BEFORE mapping it to the API
+    // 8. Create custom domain and set it as the default domain for the API
     const apiDomain = new apigw.DomainName(this, "ApiDomainName", {
       domainName: "api.internal.com",
       certificate,
-      endpointType: apigw.EndpointType.REGIONAL, // Use REGIONAL instead of PRIVATE for domain
+      endpointType: apigw.EndpointType.REGIONAL, // Use REGIONAL for domain
       securityPolicy: apigw.SecurityPolicy.TLS_1_2,
     });
 
-    // Set the custom domain as the default domain for the API
+    // Associate the custom domain with the API
     api.addDomainName("DefaultDomain", {
       domainName: "api.internal.com",
       certificate,
