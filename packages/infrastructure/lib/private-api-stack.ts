@@ -96,7 +96,7 @@ export class PrivateApiStack extends cdk.Stack {
       },
     });
 
-    // 7. Create and attach the custom domain name
+    // 7. Create and attach the custom domain name separately
     const apiDomain = new apigw.DomainName(this, "ApiDomainName", {
       domainName: "api.internal.com",
       certificate,
@@ -104,22 +104,22 @@ export class PrivateApiStack extends cdk.Stack {
       securityPolicy: apigw.SecurityPolicy.TLS_1_2,
     });
 
-    // Explicitly map the root path to the API stage
+    // 8. Map the domain to the API stage
     apiDomain.addBasePathMapping(api, {
-      basePath: "", // Empty base path makes this the default domain
+      basePath: "",
       stage: api.deploymentStage,
     });
 
-    // 8. Create DNS Record
+    // 9. Create DNS A record using the domain name resource
     new route53.ARecord(this, "AliasRecord", {
       zone: hostedZone,
       recordName: "api",
       target: route53.RecordTarget.fromAlias(
-        new targets.ApiGatewayDomain(apiDomain)
+        new targets.ApiGatewayDomain(apiDomain) // ✅ Correct class to use here
       ),
     });
 
-    // 9. Outputs
+    // 10. Output the URL
     new cdk.CfnOutput(this, "ApiUrl", {
       value: `https://api.internal.com/prod`,
       description: "Private API URL",
