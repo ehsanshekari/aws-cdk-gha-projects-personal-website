@@ -6,9 +6,9 @@ import {
   aws_lambda as lambda,
   aws_ec2 as ec2,
   aws_iam as iam,
-  aws_certificatemanager as acm,
   aws_route53 as route53,
   aws_route53_targets as targets,
+  Duration,
 } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
@@ -42,7 +42,7 @@ export class PrivateApiStack extends Stack {
         exports.handler = async () => {
           return {
             statusCode: 200,
-            body: "Private Hello from Lambda, What is this?!"
+            body: "Hello from Private Lambda!"
           };
         };
       `),
@@ -74,7 +74,7 @@ export class PrivateApiStack extends Stack {
       },
     });
 
-    // 5. Lambda integration
+    // 5. Lambda Integration
     const integration = new apigw.LambdaIntegration(fn);
     const resource = api.root.addResource("hello");
     resource.addMethod("GET", integration);
@@ -107,55 +107,22 @@ export class PrivateApiStack extends Stack {
       }
     );
 
-    // 8. ACM Certificate with DNS Validation
-    const certificate = new acm.Certificate(this, "InternalApiCert", {
-      domainName: "api.internal.com",
-      validation: acm.CertificateValidation.fromDns(hostedZone),
-    });
-
-    // 9. Custom Domain for API Gateway
-    const domainName = new apigw.DomainName(this, "PrivateApiCustomDomain", {
-      domainName: "api.internal.com",
-      certificate,
-      endpointType: apigw.EndpointType.PRIVATE,
-      securityPolicy: apigw.SecurityPolicy.TLS_1_2,
-    });
-
-    // 10. BasePath Mapping
-    new apigw.BasePathMapping(this, "BasePathMapping", {
-      domainName,
-      restApi: api,
-      basePath: "",
-    });
-
-    // 11. DNS Record for custom domain
-    new route53.ARecord(this, "ApiAliasRecord", {
+    // 8. DNS Record - point api.internal.com to VPC Endpoint DNS name
+    new route53.CnameRecord(this, "PrivateApiCnameRecord", {
       zone: hostedZone,
-      recordName: "api.internal.com",
-      target: route53.RecordTarget.fromAlias(
-        new targets.ApiGatewayDomain(domainName)
-      ),
+      recordName: "api", // api.internal.com
+      domainName: apiGatewayVpce.vpcEndpointDnsEntries[0],
+      ttl: Duration.minutes(5),
     });
 
-    // 12. Outputs
-    new CfnOutput(this, "ApiGatewayId", {
-      value: api.restApiId,
-      exportName: "PrivateApiGatewayId",
+    // 9. Outputs
+    new CfnOutput(this, "InvokeUrl", {
+      value: `https://api.internal.com/dev/hello`,
+      exportName: "PrivateApiInvokeUrl",
     });
 
-    new CfnOutput(this, "ApiGatewayRootResourceId", {
-      value: api.root.resourceId,
-      exportName: "PrivateApiGatewayRootResourceId",
-    });
-
-    new CfnOutput(this, "VpcEndpointId", {
-      value: apiGatewayVpce.vpcEndpointId,
-      exportName: "ApiGatewayVpcEndpointId",
-    });
-
-    new CfnOutput(this, "CustomDomain", {
-      value: domainName.domainNameAliasDomainName,
-      exportName: "PrivateApiCustomDomainName",
+    new CfnOutput(this, "VpcEndpointDns", {
+      value: apiGatewayVpce.vpcEndpointDnsEntries[0],
     });
   }
 }
