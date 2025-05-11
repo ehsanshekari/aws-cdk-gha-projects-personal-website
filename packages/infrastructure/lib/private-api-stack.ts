@@ -79,7 +79,15 @@ export class PrivateApiStack extends Stack {
       validation: acm.CertificateValidation.fromDns(hostedZone),
     });
 
-    // 6. Private REST API - Now with proper domain name configuration
+    // 6. Custom Domain Name - Must be created before the API
+    const domainName = new apigw.DomainName(this, "PrivateApiDomain", {
+      domainName: "api.internal.com",
+      certificate,
+      endpointType: apigw.EndpointType.PRIVATE,
+      securityPolicy: apigw.SecurityPolicy.TLS_1_2,
+    });
+
+    // 7. Private REST API
     const api = new apigw.RestApi(this, "PrivateApi", {
       restApiName: "PrivateApiGateway",
       endpointConfiguration: {
@@ -89,14 +97,20 @@ export class PrivateApiStack extends Stack {
       deployOptions: {
         stageName: "dev",
       },
-      // Important: We'll handle the domain name separately
     });
 
-    // 7. API Gateway Resources and Methods
+    // 8. API Mapping - Connect domain to API
+    new apigw.BasePathMapping(this, "ApiMapping", {
+      domainName,
+      restApi: api,
+      stage: api.deploymentStage,
+    });
+
+    // 9. API Gateway Resources and Methods
     const integration = new apigw.LambdaIntegration(fn);
     api.root.addResource("hello").addMethod("GET", integration);
 
-    // 8. Resource Policy
+    // 10. Resource Policy
     const apiGatewayRestApi = api.node.defaultChild as apigw.CfnRestApi;
     apiGatewayRestApi.policy = new iam.PolicyDocument({
       statements: [
@@ -114,16 +128,7 @@ export class PrivateApiStack extends Stack {
       ],
     }).toJSON();
 
-    // 9. Custom Domain Name - The correct way to set it up
-    const domainName = new apigw.DomainName(this, "PrivateApiDomain", {
-      domainName: "api.internal.com",
-      certificate,
-      endpointType: apigw.EndpointType.PRIVATE,
-      securityPolicy: apigw.SecurityPolicy.TLS_1_2,
-      mapping: api, // This connects the domain to our API
-    });
-
-    // 10. DNS Records
+    // 11. DNS Records
     new route53.ARecord(this, "PrivateApiARecord", {
       zone: hostedZone,
       recordName: "api",
@@ -133,7 +138,7 @@ export class PrivateApiStack extends Stack {
       ttl: Duration.minutes(5),
     });
 
-    // 11. Outputs
+    // 12. Outputs
     new CfnOutput(this, "InvokeUrl", {
       value: `https://api.internal.com/dev/hello`,
       description: "URL to invoke the private API",
