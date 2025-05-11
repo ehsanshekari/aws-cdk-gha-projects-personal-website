@@ -110,16 +110,19 @@ export class PrivateApiStack extends Stack {
       exportName: "PrivateApiGatewayUrl",
     });
 
-    // 8. (Optional) Private DNS with Route53
-    // const hostedZone = new route53.PrivateHostedZone(this, 'InternalHostedZone', {
-    //   zoneName: 'internal.example.com',
-    //   vpc,
-    // });
+    const hostedZone = new route53.PrivateHostedZone(
+      this,
+      "InternalHostedZone",
+      {
+        zoneName: "internal.com",
+        vpc,
+      }
+    );
 
-    // new route53.ARecord(this, 'ApiAliasRecord', {
-    //   zone: hostedZone,
-    //   recordName: 'api.internal.example.com',
-    //   target: route53.RecordTarget.fromAlias(new targets.ApiGateway(api)),
-    // });
+    new route53.ARecord(this, "ApiAliasRecord", {
+      zone: hostedZone,
+      recordName: "api.internal.com",
+      target: route53.RecordTarget.fromAlias(new targets.ApiGateway(api)),
+    });
   }
 }
