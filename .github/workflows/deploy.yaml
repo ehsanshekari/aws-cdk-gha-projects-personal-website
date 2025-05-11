@@ -55,6 +55,6 @@ jobs:
           cdk deploy --all --require-approval never
         working-directory: ./packages/infrastructure
 
-      - name: Deploy React App to S3
-        run: |
-          aws s3 sync ./packages/client/dist2 s3://ehsan-hub-web-app-dev/ --delete
+      # - name: Deploy React App to S3
+      #   run: |
+      #     aws s3 sync ./packages/client/dist2 s3://ehsan-hub-web-app-dev/ --delete
